@@ -2,34 +2,67 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+// function App() {
+//   const [count, setCount] = useState(0)
 
-function App() {
-  const [count, setCount] = useState(0)
+//   return (
+//    <>
+//    thishidhsdfjf
+//    </>
+//   )
+// }
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+// export default App
+// 'use client';
+
+import { init, id } from '@instantdb/react';
+
+// Connect to the database
+// ---------
+const db = init({
+  appId: import.meta.env.INSTANT_API,
+});
+
+function addMessage(text) {
+  db.transact(
+    db.tx.messages[id()].update({
+      text,
+      createdAt: new Date(),
+    }),
+  );
 }
 
-export default App
+function App() {
+  // Read Data
+  const { isLoading, error, data } = db.useQuery({ messages: {} });
+  if (isLoading) return <div>Fetching data...</div>;
+  if (error) return <div>Error fetching data: {error.message}</div>;
+  const { messages } = data;
+
+  const sortedMessages = messages.sort(
+    (a, b) =>
+      // @ts-expect-error
+      new Date(a.createdAt) - new Date(b.createdAt),
+  );
+
+  return (
+    <div className="p-4">
+      <form
+        className="flex space-x-2"
+        onSubmit={(e => {
+          e.preventDefault();
+          addMessage(e.target[0].value);
+          e.target[0].value = '';
+        })}
+      >
+        <input placeholder="What needs to be done?" type="text" />
+        <button type="submit">Add</button>
+      </form>
+      {sortedMessages.map((message) => (
+        <div key={message.id}>{message.text}</div>
+      ))}
+    </div>
+  );
+}
+
+export default App;
