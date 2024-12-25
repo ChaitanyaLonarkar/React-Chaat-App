@@ -2,6 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+
 // function App() {
 //   const [count, setCount] = useState(0)
 
@@ -16,11 +17,13 @@ import './App.css'
 // 'use client';
 
 import { init, id } from '@instantdb/react';
+import schema from './schema/schema'
 
 // Connect to the database
 // ---------
 const db = init({
   appId: import.meta.env.INSTANT_API,
+  schema
 });
 
 function addMessage(text) {
